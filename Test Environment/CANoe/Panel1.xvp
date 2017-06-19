@@ -1,0 +1,307 @@
+<?xml version="1.0"?>
+<Panel Type="Vector.CANalyzer.Panels.PanelSerializer, Vector.CANalyzer.Panels.Serializer, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null">
+  <Object Type="Vector.CANalyzer.Panels.Runtime.Panel, Vector.CANalyzer.Panels.Common, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="Panel" Children="Controls" ControlName="Panel1">
+    <Object Type="Vector.CANalyzer.Panels.Design.GroupBoxControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="GroupBoxControl5" Children="Controls" ControlName="Group Box 5">
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl8" ControlName="LED Control">
+        <Property Name="Name">LEDControl8</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">242, 49</Property>
+        <Property Name="UsedLEDColorOn">DodgerBlue</Property>
+        <Property Name="UsedLEDColorOff">DarkGray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_door_Backdoor_ONOFF;1;;;-1</Property>
+        <Property Name="TabIndex">14</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl15" Children="Controls" ControlName="Static Text">
+        <Property Name="Name">StaticTextControl15</Property>
+        <Property Name="Size">118, 13</Property>
+        <Property Name="Location">195, 19</Property>
+        <Property Name="Text">Open/Close Back Door</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl5" ControlName="LED Control">
+        <Property Name="Name">LEDControl5</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">63, 49</Property>
+        <Property Name="UsedLEDColorOn">DodgerBlue</Property>
+        <Property Name="UsedLEDColorOff">DarkGray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_door_frontdoor_ONOFF;1;;;-1</Property>
+        <Property Name="TabIndex">12</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl14" Children="Controls" ControlName="Static Text">
+        <Property Name="Name">StaticTextControl14</Property>
+        <Property Name="Size">117, 13</Property>
+        <Property Name="Location">16, 19</Property>
+        <Property Name="Text">Open/Close Front Door</Property>
+      </Object>
+      <Property Name="Name">GroupBoxControl5</Property>
+      <Property Name="Size">420, 100</Property>
+      <Property Name="Location">8, 206</Property>
+      <Property Name="Text">Door</Property>
+      <Property Name="TabIndex">4</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.GroupBoxControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="GroupBoxControl4" Children="Controls" ControlName="Group Box 4">
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl6" ControlName="LED Control 2">
+        <Property Name="Name">LEDControl6</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">100, 57</Property>
+        <Property Name="UsedLEDColorOn">DodgerBlue</Property>
+        <Property Name="UsedLEDColorOff">DarkGray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_console_HighLow;1;;;-1</Property>
+        <Property Name="TabIndex">9</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl7" ControlName="LED Control">
+        <Property Name="Name">LEDControl7</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">31, 57</Property>
+        <Property Name="UsedLEDColorOn">DodgerBlue</Property>
+        <Property Name="UsedLEDColorOff">DarkGray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_console_ONOFF;1;;;-1</Property>
+        <Property Name="TabIndex">8</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl12" Children="Controls" ControlName="Static Text 2">
+        <Property Name="Name">StaticTextControl12</Property>
+        <Property Name="Size">54, 13</Property>
+        <Property Name="Location">84, 27</Property>
+        <Property Name="Text">High/Low</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl13" Children="Controls" ControlName="Static Text">
+        <Property Name="Name">StaticTextControl13</Property>
+        <Property Name="Size">48, 13</Property>
+        <Property Name="Location">21, 27</Property>
+        <Property Name="Text">ON/OFF</Property>
+      </Object>
+      <Property Name="Name">GroupBoxControl4</Property>
+      <Property Name="Size">184, 90</Property>
+      <Property Name="Location">3, 106</Property>
+      <Property Name="Text">Console</Property>
+      <Property Name="TabIndex">3</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.GroupBoxControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="GroupBoxControl3" Children="Controls" ControlName="Group Box 3">
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl10" ControlName="LED Control">
+        <Property Name="Name">LEDControl10</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">95, 136</Property>
+        <Property Name="UsedLEDColorOff">Gray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_dash_BackDoor_onOff;1;;;-1</Property>
+        <Property Name="TabIndex">16</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl9" ControlName="LED Control">
+        <Property Name="Name">LEDControl9</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">26, 136</Property>
+        <Property Name="UsedLEDColorOff">Gray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_dash_FrontDoor_onOff;1;;;-1</Property>
+        <Property Name="TabIndex">15</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl18" Children="Controls" ControlName="Static Text 8">
+        <Property Name="Name">StaticTextControl18</Property>
+        <Property Name="Size">54, 13</Property>
+        <Property Name="Location">9, 117</Property>
+        <Property Name="Text">FrontDoor</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl17" Children="Controls" ControlName="Static Text 8">
+        <Property Name="Name">StaticTextControl17</Property>
+        <Property Name="Size">55, 13</Property>
+        <Property Name="Location">84, 117</Property>
+        <Property Name="Text">BackDoor</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl16" Children="Controls" ControlName="Static Text 7">
+        <Property Name="Name">StaticTextControl16</Property>
+        <Property Name="Size">30, 13</Property>
+        <Property Name="Location">63, 102</Property>
+        <Property Name="Text">Door</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl11" Children="Controls" ControlName="Static Text 6">
+        <Property Name="Name">StaticTextControl11</Property>
+        <Property Name="Size">34, 13</Property>
+        <Property Name="Location">376, 77</Property>
+        <Property Name="Text">Petrol</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl10" Children="Controls" ControlName="Static Text 6">
+        <Property Name="Name">StaticTextControl10</Property>
+        <Property Name="Size">34, 13</Property>
+        <Property Name="Location">376, 38</Property>
+        <Property Name="Text">Temp</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.ProgressBarControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="ProgressBarControl2" Children="Controls" ControlName="Progress Bar">
+        <Property Name="Name">ProgressBarControl2</Property>
+        <Property Name="Size">135, 28</Property>
+        <Property Name="Location">422, 77</Property>
+        <Property Name="OriginValue">0</Property>
+        <Property Name="DecimalPlaces">0</Property>
+        <Property Name="ValueSize">38, 28</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_dash_Petrol;1;;;-1</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.ProgressBarControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="ProgressBarControl1" Children="Controls" ControlName="Progress Bar">
+        <Property Name="Name">ProgressBarControl1</Property>
+        <Property Name="Size">135, 41</Property>
+        <Property Name="Location">422, 19</Property>
+        <Property Name="OriginValue">0</Property>
+        <Property Name="ValuePos">Top</Property>
+        <Property Name="DecimalPlaces">0</Property>
+        <Property Name="ValueSize">135, 13</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_dash_Temp;1;;;-1</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl9" Children="Controls" ControlName="Static Text 5">
+        <Property Name="Name">StaticTextControl9</Property>
+        <Property Name="Size">38, 13</Property>
+        <Property Name="Location">240, 117</Property>
+        <Property Name="Text">Speed</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.MeterControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="MeterControl1" ControlName="Meter">
+        <Property Name="Name">MeterControl1</Property>
+        <Property Name="Size">225, 180</Property>
+        <Property Name="Location">144, 10</Property>
+        <Property Name="ScaleMax">255</Property>
+        <Property Name="SweepAngleFrom">-90</Property>
+        <Property Name="SweepAngleTo">90</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_dash_Speed;1;;;-1</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl8" Children="Controls" ControlName="Static Text 4">
+        <Property Name="Name">StaticTextControl8</Property>
+        <Property Name="Size">33, 13</Property>
+        <Property Name="Location">63, 19</Property>
+        <Property Name="Text">Lamb</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl3" ControlName="LED Control 2">
+        <Property Name="Name">LEDControl3</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">95, 66</Property>
+        <Property Name="UsedLEDColorOff">Gray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_dash_Lamp_highLow;1;;;-1</Property>
+        <Property Name="TabIndex">9</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl6" Children="Controls" ControlName="Static Text 2">
+        <Property Name="Name">StaticTextControl6</Property>
+        <Property Name="Size">54, 13</Property>
+        <Property Name="Location">84, 32</Property>
+        <Property Name="Text">High/Low</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl4" ControlName="LED Control">
+        <Property Name="Name">LEDControl4</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">26, 66</Property>
+        <Property Name="UsedLEDColorOff">Gray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_dash_Lamb_onOff;1;;;-1</Property>
+        <Property Name="TabIndex">8</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl7" Children="Controls" ControlName="Static Text">
+        <Property Name="Name">StaticTextControl7</Property>
+        <Property Name="Size">48, 13</Property>
+        <Property Name="Location">21, 32</Property>
+        <Property Name="Text">ON/OFF</Property>
+      </Object>
+      <Property Name="Name">GroupBoxControl3</Property>
+      <Property Name="Size">564, 183</Property>
+      <Property Name="Location">8, 312</Property>
+      <Property Name="Text">Dashboard</Property>
+      <Property Name="TabIndex">2</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.GroupBoxControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="GroupBoxControl2" Children="Controls" ControlName="Group Box 2">
+      <Object Type="Vector.CANalyzer.Panels.Design.TrackBarControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="TrackBarControl3" Children="Controls" ControlName="Track Bar">
+        <Property Name="Name">TrackBarControl3</Property>
+        <Property Name="Size">239, 47</Property>
+        <Property Name="Location">87, 126</Property>
+        <Property Name="Maximum">100</Property>
+        <Property Name="TickFrequency">5</Property>
+        <Property Name="SmallChange">5</Property>
+        <Property Name="LargeChange">10</Property>
+        <Property Name="SmallChangeDouble">5</Property>
+        <Property Name="LargeChangeDouble">10</Property>
+        <Property Name="TickFrequencyDouble">5</Property>
+        <Property Name="MaximumDouble">100</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN1PowerTrain;;;env_Petrol;1;;;-1</Property>
+        <Property Name="TabIndex">7</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.TrackBarControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="TrackBarControl2" Children="Controls" ControlName="Track Bar">
+        <Property Name="Name">TrackBarControl2</Property>
+        <Property Name="Size">239, 47</Property>
+        <Property Name="Location">87, 69</Property>
+        <Property Name="Maximum">255</Property>
+        <Property Name="TickFrequency">5</Property>
+        <Property Name="SmallChange">5</Property>
+        <Property Name="LargeChange">10</Property>
+        <Property Name="SmallChangeDouble">5</Property>
+        <Property Name="LargeChangeDouble">10</Property>
+        <Property Name="TickFrequencyDouble">5</Property>
+        <Property Name="MaximumDouble">255</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN1PowerTrain;;;env_Speed;1;;;-1</Property>
+        <Property Name="TabIndex">6</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl5" Children="Controls" ControlName="Static Text 3">
+        <Property Name="Name">StaticTextControl5</Property>
+        <Property Name="Size">34, 13</Property>
+        <Property Name="Location">22, 126</Property>
+        <Property Name="Text">Petrol</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl4" Children="Controls" ControlName="Static Text 3">
+        <Property Name="Name">StaticTextControl4</Property>
+        <Property Name="Size">38, 13</Property>
+        <Property Name="Location">21, 79</Property>
+        <Property Name="Text">Speed</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl3" Children="Controls" ControlName="Static Text 3">
+        <Property Name="Name">StaticTextControl3</Property>
+        <Property Name="Size">34, 13</Property>
+        <Property Name="Location">21, 30</Property>
+        <Property Name="Text">Temp</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.TrackBarControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="TrackBarControl1" Children="Controls" ControlName="Track Bar">
+        <Property Name="Name">TrackBarControl1</Property>
+        <Property Name="Size">239, 47</Property>
+        <Property Name="Location">87, 20</Property>
+        <Property Name="Maximum">100</Property>
+        <Property Name="TickFrequency">5</Property>
+        <Property Name="SmallChange">5</Property>
+        <Property Name="LargeChange">10</Property>
+        <Property Name="SmallChangeDouble">5</Property>
+        <Property Name="LargeChangeDouble">10</Property>
+        <Property Name="TickFrequencyDouble">5</Property>
+        <Property Name="MaximumDouble">100</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN1PowerTrain;;;env_Temp;1;;;-1</Property>
+        <Property Name="TabIndex">0</Property>
+      </Object>
+      <Property Name="Name">GroupBoxControl2</Property>
+      <Property Name="Size">374, 182</Property>
+      <Property Name="Location">193, 14</Property>
+      <Property Name="Text">Engine</Property>
+      <Property Name="TabIndex">1</Property>
+    </Object>
+    <Object Type="Vector.CANalyzer.Panels.Design.GroupBoxControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="GroupBoxControl1" Children="Controls" ControlName="Group Box">
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl2" ControlName="LED Control 2">
+        <Property Name="Name">LEDControl2</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">100, 55</Property>
+        <Property Name="UsedLEDColorOff">Gray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_HighLow;1;;;-1</Property>
+        <Property Name="TabIndex">5</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.LEDControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="LEDControl1" ControlName="LED Control">
+        <Property Name="Name">LEDControl1</Property>
+        <Property Name="Size">24, 24</Property>
+        <Property Name="Location">31, 55</Property>
+        <Property Name="UsedLEDColorOff">Gray</Property>
+        <Property Name="SymbolConfiguration">4;1;CAN0Comfort;;;env_ONOFF;1;;;-1</Property>
+        <Property Name="TabIndex">4</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl2" Children="Controls" ControlName="Static Text 2">
+        <Property Name="Name">StaticTextControl2</Property>
+        <Property Name="Size">54, 13</Property>
+        <Property Name="Location">84, 25</Property>
+        <Property Name="Text">High/Low</Property>
+      </Object>
+      <Object Type="Vector.CANalyzer.Panels.Design.StaticTextControl, Vector.CANalyzer.Panels.CommonControls, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null" Name="StaticTextControl1" Children="Controls" ControlName="Static Text">
+        <Property Name="Name">StaticTextControl1</Property>
+        <Property Name="Size">48, 13</Property>
+        <Property Name="Location">21, 25</Property>
+        <Property Name="Text">ON/OFF</Property>
+      </Object>
+      <Property Name="Name">GroupBoxControl1</Property>
+      <Property Name="Size">184, 92</Property>
+      <Property Name="Location">3, 14</Property>
+      <Property Name="Text">Lamp</Property>
+      <Property Name="TabIndex">0</Property>
+    </Object>
+    <Property Name="Name">Panel</Property>
+    <Property Name="Size">575, 495</Property>
+  </Object>
+</Panel>

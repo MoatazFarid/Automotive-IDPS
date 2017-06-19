@@ -1,0 +1,38 @@
+/*@!Encoding:1252*/
+includes
+{
+  
+}
+
+variables
+{
+  
+}
+
+/* on recieve msg Speed make the env variable of its value  */
+on message Speed0
+{
+  @env_dash_Speed= this.Speed;
+  
+}
+
+on message TempPetrol0{
+  @env_dash_Petrol = this.PetrolLevel;
+  @env_dash_Temp = this.TempLevel;
+}
+
+on message LampData{
+  if(this.ONOFF == 0){
+    @env_dash_Lamb_onOff = this.ONOFF;
+    @env_dash_Lamp_highLow = 0;
+  }else{
+    @env_dash_Lamb_onOff = this.ONOFF;
+    @env_dash_Lamp_highLow = this.HighLow;
+  }
+  
+}
+
+on message DoorData{
+  @env_dash_BackDoor_onOff = this.BackONOFF;
+  @env_dash_FrontDoor_onOff = this.FrontONOFF;
+}

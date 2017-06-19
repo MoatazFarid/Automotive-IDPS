@@ -1,0 +1,63 @@
+/*@!Encoding:1252*/
+includes
+{
+  
+}
+
+variables
+{
+  message 0x11 TempPetrol_MSG;
+  message 0x12 Speed_MSG;
+  
+  msTimer timer_10ms;
+  msTimer timer_500ms;
+  
+}
+
+on start{
+  setTimer(timer_500ms,500);//temp timer
+  setTimer(timer_10ms,10); //engine Speed timer
+}
+
+//engine Speed timer that send periodic engine speed msg
+on timer timer_10ms{
+  output(Speed_MSG);
+  //repeat timer
+  setTimer(timer_10ms,10);
+}
+
+//engine Temprature/petrol timer that send periodic TempPetrol_MSG
+on timer timer_500ms{
+  output(TempPetrol_MSG);
+  //repeat timer
+  setTimer(timer_500ms,500);
+}
+
+// read speed
+on envVar env_Speed
+{
+  //send msg speed_MSG
+  Speed_MSG.Speed = @env_Speed;
+  //output(Speed_MSG); // removed since we will use periodic msgs instead
+}
+
+// read PetrolLevel PetrolLevel 
+on envVar env_Petrol
+{
+  TempPetrol_MSG.PetrolLevel = @env_Petrol;
+  TempPetrol_MSG.TempLevel = @env_Temp;
+  
+  //send msg tempPetrol_MSG
+  //output(TempPetrol_MSG); // removed since we will use periodic msgs instead
+}
+
+// read temp level 
+on envVar env_Temp
+{
+  TempPetrol_MSG.PetrolLevel = @env_Petrol;
+  TempPetrol_MSG.TempLevel = @env_Temp;
+  
+  //send msg tempPetrol_MSG
+  //output(TempPetrol_MSG); // removed since we will use periodic msgs instead
+}
+

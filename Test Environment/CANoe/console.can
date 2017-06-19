@@ -1,0 +1,115 @@
+/*@!Encoding:1252*/
+includes
+{
+  
+}
+
+variables
+{
+  message CAN1::LampData lampData;
+  message CAN1::TempPetrol0 tmpPtrl_msg0;
+  message CAN1::Speed0 speed_msg0;
+  
+  
+  // bus context
+  dword gBusContext_Comfort;
+  dword gBusContext_PowerTrain;
+  char gComfort[32]     = "CAN0";
+  char gPowerTrain[32]  = "CAN1";
+  msTimer timer_500ms;/*timer that will be used to check every 500 ms */
+}
+on start{
+
+  setTimer(timer_500ms,500);  
+
+}
+// a periodic msg timer that will send msgs every 500ms
+on timer timer_500ms
+{
+  output(lampData);
+  setTimer(timer_500ms,500);
+}
+
+on preStart
+{
+  // Get the bus context of both busses
+
+  gBusContext_Comfort   = GetBusNameContext(gComfort);
+  gBusContext_PowerTrain = GetBusNameContext(gPowerTrain);
+
+  if (0 == gBusContext_Comfort)
+  {
+    writeex( 0, 3, "Error: Cannot determine context for bus: %s", gComfort);
+  }
+
+  if (0 == gBusContext_PowerTrain)
+  {
+    writeex( 0, 3, "Error: Cannot determine context for bus: %s", gPowerTrain);
+  }   
+}
+
+
+/*
+* This event will send Lambdata msg if we recieved a console ON/OFF signal (as if it was from the sensor)
+*/
+on envVar env_console_ONOFF
+{
+  //setBusContext(gBusContext_Comfort);
+  if ( @env_console_ONOFF == 1 ){
+    lampData.ONOFF = 1;
+    //output(lampData);// this is removed since we will send periodic msgs
+  }else{
+    lampData.ONOFF = 0;
+    //output(lampData);// this is removed since we will send periodic msgs
+  } 
+}
+
+/*
+* it will recieve the engine   
+* 0x11 TempPetrol_MSG;
+* 0x12 Speed_MSG; 
+* from CAN1 
+* then send them to the Dashboard in CAN0
+* 
+*/
+on message CAN2::TempPetrol_MSG{
+   
+  /* change the context to comfort bus == CAN0 */
+  //setBusContext(gBusContext_Comfort);  
+  
+  tmpPtrl_msg0.TempLevel = this.TempLevel;
+  tmpPtrl_msg0.PetrolLevel = this.PetrolLevel;
+  
+  output(tmpPtrl_msg0);// sporadic msg is sent
+}
+on message CAN2::Speed_MSG {
+  //setBusContext(gBusContext_Comfort);
+  speed_msg0.Speed = this.Speed;
+  output(speed_msg0); // sporadic msg is sent
+}
+
+
+/*
+* This event will send LampData msg 
+* with data toggled of high / low Only if the power is ON 
+if we recieved a console high/Low signal (as if it was from the sensor)
+*/
+on envVar env_console_HighLow
+{
+  setBusContext(gBusContext_Comfort);
+  
+  lampData.ONOFF = @env_console_ONOFF;
+  
+  if (@env_console_ONOFF == 1){ /* if power is ON */
+    if (@env_console_HighLow == 1){ /*it was high */
+      lampData.HighLow = 1;
+      
+    }else{ /* if power is ON and it was Low */
+      lampData.HighLow = 0;
+    }  
+  }else{ /* incase power was OFF */
+    lampData.HighLow = @env_console_HighLow;
+  }
+  //output(lampData); // this is removed since we will send periodic msgs
+}
+

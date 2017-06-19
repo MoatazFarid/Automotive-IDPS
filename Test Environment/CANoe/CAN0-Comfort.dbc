@@ -1,0 +1,84 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Door Dashboard Console Lamp
+
+
+BO_ 96 DoorData: 8 Door
+ SG_ FrontONOFF : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ BackONOFF : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 18 Speed0: 8 Console
+ SG_ Speed : 0|8@1+ (1,0) [0|0] ""  Dashboard
+
+BO_ 17 TempPetrol0: 8 Console
+ SG_ TempLevel : 8|8@1+ (1,0) [0|0] ""  Dashboard
+ SG_ PetrolLevel : 0|8@1+ (1,0) [0|0] ""  Dashboard
+
+BO_ 80 LampData: 8 Console
+ SG_ ONOFF : 1|1@1+ (1,0) [0|1] ""  Lamp,Dashboard
+ SG_ HighLow : 0|1@1+ (1,0) [0|1] ""  Lamp,Dashboard
+
+
+
+EV_ env_door_frontdoor_ONOFF: 0 [0|0] "" 0 1 DUMMY_NODE_VECTOR0  Door;
+
+EV_ env_door_Backdoor_ONOFF: 0 [0|0] "" 0 2 DUMMY_NODE_VECTOR0  Door;
+
+EV_ env_dash_FrontDoor_onOff: 0 [0|0] "" 0 3 DUMMY_NODE_VECTOR0  Dashboard;
+
+EV_ env_dash_BackDoor_onOff: 0 [0|0] "" 0 4 DUMMY_NODE_VECTOR0  Dashboard;
+
+EV_ env_console_HighLow: 0 [0|0] "" 0 5 DUMMY_NODE_VECTOR0  Console;
+
+EV_ env_console_ONOFF: 0 [0|0] "" 0 6 DUMMY_NODE_VECTOR0  Console;
+
+EV_ env_HighLow: 0 [0|0] "" 0 7 DUMMY_NODE_VECTOR0  Lamp;
+
+EV_ env_ONOFF: 0 [0|0] "" 0 8 DUMMY_NODE_VECTOR0  Lamp;
+
+EV_ env_dash_Petrol: 0 [0|0] "" 0 9 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ env_dash_Temp: 0 [0|0] "" 0 10 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ env_dash_Speed: 0 [0|0] "" 0 11 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ env_dash_Lamp_highLow: 0 [0|0] "" 0 12 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ env_dash_Lamb_onOff: 0 [0|0] "" 0 13 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+

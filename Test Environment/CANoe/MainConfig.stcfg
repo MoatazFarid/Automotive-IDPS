@@ -1,0 +1,6 @@
+[NStatePersistence]
+Signature=VectorStatePersistence
+[VGlobalMeasurementIndex]
+mMeasurementIndex=36
+[VTestConfigurationConfigData]
+lampConsole_NextTestRun=1

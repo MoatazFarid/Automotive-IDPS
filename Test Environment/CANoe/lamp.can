@@ -1,0 +1,22 @@
+/*@!Encoding:1252*/
+includes
+{
+  
+}
+
+variables
+{
+  int onOff_Status; /* 1 for ON and 0 for OFF */
+  int highLow_Status; /* 1 for high and 0 for low */
+ }
+
+on message LampData{
+  //get On off
+  onOff_Status = this.ONOFF;
+  //get high/low
+  highLow_Status = this.HighLow;
+  
+  @env_ONOFF = onOff_Status;
+  @env_HighLow = highLow_Status;
+  
+}

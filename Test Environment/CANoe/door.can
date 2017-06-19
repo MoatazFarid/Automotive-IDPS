@@ -1,0 +1,47 @@
+/*@!Encoding:1252*/
+includes
+{
+  
+}
+
+variables
+{
+  message 0x60 DoorDataMSG;// door data msg of ID 0x60
+  
+  msTimer timer_100_ms;// timer for door data status msgs every 100 ms 
+  
+}
+
+/*on start simulation*/
+on start
+{
+  /*initialization of the signals*/
+  DoorDataMSG.FrontONOFF = 0;
+  DoorDataMSG.BackONOFF = 0;
+  
+  /* set timers */
+  setTimer(timer_100_ms,100);// after 100 ms run this timer
+}
+
+/* start this timer every 100ms to send the Doordata status msgs*/
+on timer timer_100_ms
+{
+  //send the msg on the bus 
+  output(DoorDataMSG);
+  //set timer again to create a  loop
+  setTimer(timer_100_ms,100);// after 100 ms  
+}
+
+/*on the change of the frontdoor env from the pannel */
+on envVar env_door_frontdoor_ONOFF{
+  // change the values of the signals of the front door 
+  DoorDataMSG.FrontONOFF = @env_door_frontdoor_ONOFF;
+  
+}
+
+/*on the change of the backdoor env from the pannel */
+on envVar env_door_Backdoor_ONOFF{
+  // change the values of the signals of the front door 
+  DoorDataMSG.BackONOFF = @env_door_Backdoor_ONOFF;
+  
+}
