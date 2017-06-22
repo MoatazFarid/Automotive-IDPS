@@ -1,7 +1,8 @@
 import sys, serial,time,binascii
 
 ''' Basic configuration'''
-COM_PORT = 'COM5'
+COM_PORT = 'COM6'
+#COM_PORT = '/dev/ttyUSB0'
 BaudRate = 115200
 DEBUG = True
 sniffBus = True
@@ -10,7 +11,11 @@ sniffBus = True
 try:
     ser = serial.Serial(COM_PORT, BaudRate)
 except serial.serialutil.SerialException:
-    print ("not connected")
+    print '====================================================='
+    print ("Not connected")
+    print '====================================================='
+    exit(0)
+
 
 #starting
 class CAN_MSG:
@@ -43,9 +48,18 @@ def sniff():
     ''' start sniffing over the CAN bus  '''
     while sniffBus:
         #convert from byte to hex string
-        framebuffer =binascii.hexlify(ser.read(13))
-        canFrameDecodder(hex_to_binary(framebuffer))
+        #framebuffer =binascii.hexlify(ser.read(13))
+        framebuffer =ser.read(13)
+        # bin(framebuffer)
+        b=bin(int(binascii.hexlify(framebuffer),16))
+        #format(ord(x), 'b') for x in st
+        # print framebuffer
+        # print b
+        # msg = canFrameDecodder(hex_to_binary(framebuffer))
+        msg = canFrameDecodder(b[2:])
+
         #print (framebuffer[0:4])
+        printMsg(msg)
 
 
 def closeConn():
@@ -53,18 +67,65 @@ def closeConn():
     ser.close(0)
     sys.exit(0)
 
+
+def getStandardID(frame):
+    return frame[1:12]
+
+
+def getFrameDLC(frame):
+    return frame[35:39]
+
+def test_getFrameData():
+    # standard id= 0x110 '00100010000'
+    frame = b'10010001000010000000000000000000000000010101000000000000000000000000000000000000000000000000000000000000'
+    print frame
+    #dlc = '0001'.fromBinaryToInt()
+    dlc = int('0001',2)
+    data = getFrameData(frame,dlc)
+    print (int(data, 2))
+    # extended ID  0x60000 '00000000001100000000000000000'
+
+
+def getFrameData(frame, dlc):
+    return frame[39:(39+(8*int(dlc,2)))]
+
+
 def canFrameDecodder(frame):
+    msg = CAN_MSG()
     if isExtendedID((frame[13:14])) :
+        msg.isExtended=1
         if DEBUG == True:
             print ("Extended")
+        msg.frame_id =(int(getStandardID(frame))<<18)|int(frame[14:32])
     else:
-        print("not ex")
+        msg.isExtended=0
+        msg.frame_id = getStandardID(frame)
+    #get DLC
+    msg.frame_dlc = getFrameDLC(frame)
+    msg.data = getFrameData(frame,msg.frame_dlc)
+    return msg
+
+def printMsg(msg):
+    print type(msg.frame_id)
+    print("ID :"),(msg.frame_id)
+    print("Data :") ,binascii.hexlify(msg.data)
+    print ('\n')
 
 def isExtendedID(IDE):
+    ''' Check whether the function '''
     if IDE=='1' or  IDE== 1:
         return True
     else:
         return False
+
+def test_isExtendedID():
+    ''' Unit Test for the isExtended function '''
+    # case 1
+    i = 0
+    ans = isExtendedID(i)
+    if ans == False:
+        print ("Passed")
+
 
 def test_canFrameDecodder():
     #case 1
@@ -75,13 +136,6 @@ def test_canFrameDecodder():
 
 
 
-def test_isExtendedID():
-    # case 1
-    i = 0
-    ans = isExtendedID(i)
-    if ans == False:
-        print ("Passed")
-
 
 
 def byte_to_binary(n):
@@ -91,8 +145,8 @@ def hex_to_binary(h):
     return ''.join(byte_to_binary(ord(b)) for b in binascii.unhexlify(h))
 
 ##
-#startAuth()
-test_canFrameDecodder()
-#sniff()
+startAuth()
+# test_getFrameData()
+sniff()
 
-#closeConn()
+closeConn()
