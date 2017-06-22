@@ -1,4 +1,4 @@
-import sys, serial,time,binascii
+import sys, serial,time,binascii,struct
 
 ''' Basic configuration'''
 COM_PORT = 'COM6'
@@ -48,10 +48,10 @@ def sniff():
     ''' start sniffing over the CAN bus  '''
     while sniffBus:
         #convert from byte to hex string
-        #framebuffer =binascii.hexlify(ser.read(13))
-        framebuffer =ser.read(13)
-        # bin(framebuffer)
+        framebuffer=ser.read(13)
         b=bin(int(binascii.hexlify(framebuffer),16))
+        print b
+        b = b[2:]
         #format(ord(x), 'b') for x in st
         # print framebuffer
         # print b
@@ -69,11 +69,19 @@ def closeConn():
 
 
 def getStandardID(frame):
-    return frame[1:12]
+    return int(frame[1:12],2)
 
 
-def getFrameDLC(frame):
-    return frame[35:39]
+def getStandFrameDLC(frame):
+    ''' get the standard frame DLC '''
+    print frame[15:19]
+    print int(frame[15:19],2)
+    return int(frame[15:19],2)
+
+def getExtFrameDLC(frame):
+    print frame[35:39]
+    print int(frame[35:39],2)
+    return int(frame[35:39],2)
 
 def test_getFrameData():
     # standard id= 0x110 '00100010000'
@@ -87,7 +95,8 @@ def test_getFrameData():
 
 
 def getFrameData(frame, dlc):
-    return frame[39:(39+(8*int(dlc,2)))]
+    # return int (frame[39:(39+(8*int(dlc,2)))],2)
+    return int (frame[39:(39+(8*dlc))],2)
 
 
 def canFrameDecodder(frame):
@@ -97,11 +106,13 @@ def canFrameDecodder(frame):
         if DEBUG == True:
             print ("Extended")
         msg.frame_id =(int(getStandardID(frame))<<18)|int(frame[14:32])
+        msg.frame_dlc = getStandFrameDLC(frame)
+
     else:
         msg.isExtended=0
         msg.frame_id = getStandardID(frame)
+        msg.frame_dlc = getExtFrameDLC(frame)
     #get DLC
-    msg.frame_dlc = getFrameDLC(frame)
     msg.data = getFrameData(frame,msg.frame_dlc)
     return msg
 
