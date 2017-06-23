@@ -16,6 +16,9 @@ BaudRate = 115200
 DEBUG = True
 sniffBus = True
 
+''' Global Variables'''
+sniffed_Msgs=[]
+
 #start connection
 try:
     ser = serial.Serial(COM_PORT, BaudRate)
@@ -56,6 +59,7 @@ def startAuth():
 
 def sniff():
     ''' start sniffing over the CAN bus  '''
+    print(chr(27) + "[2J") #clear screen
     while sniffBus:
         #convert from byte to hex string
         framebuffer=ser.read(13).encode("hex")
@@ -102,8 +106,19 @@ def getStandardID(frame):
 
 def printMsg(msg):
     # print type(msg.frame_id)
-    print("ID :"),(msg.frame_id),"DLC:",msg.frame_dlc,"  Data:   ",msg.data ,'\n'
-    # print(chr(27) + "[2J") #clear screen
+    if idExists(msg):
+        # print "found"
+        pass
+        # print(chr(27) + "[2J") #clear screen
+    else:
+        sniffed_Msgs.append(msg)
+        print("ID :"),(msg.frame_id),"  ||  DLC:",msg.frame_dlc,"   ||  Data:",msg.data ,'\n'
+
+def idExists(msg):
+    for s in sniffed_Msgs:
+        if (s.frame_id == msg.frame_id) and (s.data==msg.data):
+            return True
+    return False
 
 def isExtendedID(IDE):
     ''' Check whether the function '''
