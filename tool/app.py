@@ -1,20 +1,26 @@
 '''
     CAN Bus Vulnerability tool
-    By Moataz Farid
-    This tool is part of Automotive IDPS and Cyber Security Vulnerability tool
-
-    currently sub-tools
-    - Bus Sniffer
-
+    This tool is part of Automotive IDPS and Cyber Security Vulnerability tool Graduation Project
+Usage:
+    app.py sniff [--port=COM6] [--baudrate=115200] [--d] [--conf=path]
+    app.py spoof [( <target_ecu_name> <msg_name> <signal_name> <new_val> )][--port=COM6] [--baudrate=115200] [--d] [--conf=path]
+Options:
+    --port=COM6         Select the port we connected our UCAN on default is COM6
+    --baudrate=115200   Select the BaudRate we use default is 115200
+    --d                 Debug mode
+    --conf=path         Path of the xml config file default is conf.xml file name in same directory of the script
 '''
-import sys, serial,time,binascii,struct
+try:
+    import sys,serial,time,binascii
+    from docopt import docopt
+except:
+    print 'Import Errors!!'
 
 ''' Basic configuration'''
 COM_PORT = 'COM6'
 #COM_PORT = '/dev/ttyUSB0'
 BaudRate = 115200
-DEBUG = True
-sniffBus = True
+DEBUG = False
 
 ''' Global Variables'''
 sniffed_Msgs=[]
@@ -44,7 +50,6 @@ def startAuth():
         print ("Start initialization")
     ser.setDTR(True);
     time.sleep(2)
-
     ser.write(bytearray([105, 115, 85, 50, 67]))
     if DEBUG==True :
         print ("Start reading")
@@ -60,12 +65,12 @@ def startAuth():
 def sniff():
     ''' start sniffing over the CAN bus  '''
     print(chr(27) + "[2J") #clear screen
-    while sniffBus:
+    while True:
         #convert from byte to hex string
         framebuffer=ser.read(13).encode("hex")
-        # print "DEBUG-> SERIAL is ",framebuffer
+        if DEBUG==True :
+            print "DEBUG-> SERIAL is ",framebuffer
         # bin(int(framebuffer,16)) #converted into binary
-        # print "test buffer",framebuffer[1] , type(framebuffer) , convHexToBin(framebuffer)
         msg = canFrameDecodder(framebuffer)
         printMsg(msg)
 
@@ -76,14 +81,17 @@ def closeConn():
 
 
 def getFrameData(frame, dlc):
-    # print "DEBUG --> getFrameData-> dlc is ",dlc
+    if DEBUG==True :
+        print "DEBUG --> getFrameData-> dlc is ",dlc
     data = frame[12:12+(2*dlc)]
-    # print "DEBUG --> Data is ",data
+    if DEBUG==True :
+        print "DEBUG --> Data is ",data
     return data
 
 def getFrameDLC(frame):
     dlc = int(frame[10:12],16) & 0x0F
-    # print "DEBUG --> DLC is ",dlc
+    if DEBUG==True :
+        print "DEBUG --> DLC is ",dlc
     return dlc
 
 def canFrameDecodder(frame):
@@ -94,6 +102,7 @@ def canFrameDecodder(frame):
     return msg
 
 def getStandardID(frame):
+    ''' encode the standard it '''
     # b1=int(frame[0:2],16)
     b1=int(frame[2:4],16)
     b2=int(frame[4:6],16)
@@ -101,10 +110,12 @@ def getStandardID(frame):
     b4=int(frame[8:10],16)
     fId= b1 & 0b11111110 | b2<<8 | b3<<16 | b4<<24
     fId >>=1
-    # print "DEBUG --> ID is " , fId
+    if DEBUG==True :
+        print "DEBUG --> ID is " , fId
     return fId
 
 def printMsg(msg):
+    ''' Print the sniffed msg '''
     # print type(msg.frame_id)
     if idExists(msg):
         # print "found"
@@ -115,6 +126,7 @@ def printMsg(msg):
         print("ID :"),(msg.frame_id),"  ||  DLC:",msg.frame_dlc,"   ||  Data:",msg.data ,'\n'
 
 def idExists(msg):
+    ''' This function is used in the printMsg function '''
     for s in sniffed_Msgs:
         if (s.frame_id == msg.frame_id) and (s.data==msg.data):
             return True
@@ -126,7 +138,6 @@ def isExtendedID(IDE):
         return True
     else:
         return False
-
 
 def test_canFrameDecodder():
     #case 1
@@ -141,9 +152,21 @@ def byte_to_binary(n):
 def hex_to_binary(h):
     return ''.join(byte_to_binary(ord(b)) for b in binascii.unhexlify(h))
 
-##
-startAuth()
-# test_getFrameData()
-sniff()
-
-closeConn()
+if __name__ == '__main__':
+    arguments = docopt(__doc__)
+    # start authentication
+    startAuth()
+    #getting args values Todo : cont. handling args when we need it
+    if arguments['--port'][0] != None: #set the com port
+        COM_PORT = arguments['--port'][0]
+    if arguments['--d'] == True: #enable Debug mode
+        DEBUG=True
+    if len(arguments['--baudrate']) != 0: #set baudrate
+        BaudRate = int(arguments['--baudrate'][0])
+    if arguments['sniff'] == True:
+        if DEBUG==True :
+            print "DEBUG --> Starting Sniffing commmand"
+        # sniff()
+    #close connection with the serial port
+    test_encodeID()
+    closeConn()
