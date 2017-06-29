@@ -10,6 +10,8 @@ Options:
     --d                 Debug mode
     --conf=path         Path of the xml config file default is conf.xml file name in same directory of the script
 '''
+from _ctypes import sizeof
+
 try:
     import sys,serial,time,binascii
     from docopt import docopt
@@ -64,7 +66,8 @@ def startAuth():
 
 def sniff():
     ''' start sniffing over the CAN bus  '''
-    print(chr(27) + "[2J") #clear screen
+    # print(chr(27) + "[2J") #clear screen
+    print "++++++++= Start Sniffing CAN Bus =++++++++"
     while True:
         #convert from byte to hex string
         framebuffer=ser.read(13).encode("hex")
@@ -76,7 +79,7 @@ def sniff():
 
 def closeConn():
     ''' close the connections and exit system '''
-    ser.close(0)
+    ser.close()
     sys.exit(0)
 
 
@@ -91,7 +94,7 @@ def getFrameData(frame, dlc):
 def getFrameDLC(frame):
     dlc = int(frame[10:12],16) & 0x0F
     if DEBUG==True :
-        print "DEBUG --> DLC is ",dlc
+        print "DEBUG --> DLC is ",dlc,type(dlc)
     return dlc
 
 def canFrameDecodder(frame):
@@ -126,7 +129,7 @@ def printMsg(msg):
         print("ID :"),(msg.frame_id),"  ||  DLC:",msg.frame_dlc,"   ||  Data:",msg.data ,'\n'
 
 def idExists(msg):
-    ''' This function is used in the printMsg function '''
+    ''' This function is used to check if the recieved msg has been seen before or not , it is used in the printMsg function '''
     for s in sniffed_Msgs:
         if (s.frame_id == msg.frame_id) and (s.data==msg.data):
             return True
@@ -138,6 +141,89 @@ def isExtendedID(IDE):
         return True
     else:
         return False
+
+################# encoding a frame to send data #################
+def encodeID(frame_id,isExtended):
+    # bytearr = bytearray()
+    # if isExtendedID(frame_id) :
+    b=bytearray()
+    if isExtended :#is extended
+        # print "hh"
+        b.append((frame_id<<1) | 1)
+        # print b
+    else:
+        b.extend(hex(frame_id<<1 & 0xFE))
+    #adding byte0 to the byte array
+    # bytearr = bytearray()
+    for i in range(3):
+        # bytearr.append(frame_id>>8)
+        # b[i+1] = frame_id>>8
+        b.extend(hex(frame_id>>8))
+        # print( b)
+    return bytearray([b[0],b[1],b[2],b[3]])
+
+def test_encodeID():
+    frame_id = 0x18
+    isExtended = 0
+    print encodeID(frame_id,isExtended)
+
+#ERRRRRRRRRRORR
+def encodeDLC(frame_dlc):
+    # print frame_dlc , type(frame_dlc) #frame_dlc is int number
+    b = bytearray()
+    b.extend(hex(frame_dlc))
+    if DEBUG==True :
+        print "DEBUG --> encoded DLC bytearray is " , b
+    return b
+
+def test_encodeDLC():
+    dlc=2
+    p= encodeDLC(dlc)
+    print(p)
+
+def encodeData(data,dlc):
+    b=bytearray()
+    # print(type(dlc)),type(data)
+    data = str(data)
+    for i in range(dlc):
+        ld = str(data[(i*2):(i*2)+2])
+        if ld=="":
+            ld='00'
+        ld = hex(int(ld,16))
+        b.extend(ld)
+    if DEBUG==True :
+        print "DEBUG --> encoded Data bytearray is " , b #printing the data in  the array
+    return b
+
+def encodeCANFrame(msg):
+    msgByteArray=bytearray()
+    id = encodeID(msg.frame_id,msg.isExtended)
+    # print "-id is :",id
+    dlc = encodeDLC(msg.frame_dlc)
+    # print "-dlc is ",(dlc)
+    data = encodeData(msg.data,msg.frame_dlc)
+    # print "-data is ",(data)
+    # writing to serial
+    msgByteArray = id[:]+ dlc[:]+ data[:]
+    if DEBUG==True :
+        print "DEBUG --> encoded msg bytearray is " , msgByteArray
+    return msgByteArray
+    # ser.write(msgByteArray)
+
+def sendTestFrame():
+    msg = CAN_MSG
+    msg.data=0x1
+    msg.frame_dlc=8
+    msg.isExtended = 0
+    msg.frame_id =0x62
+    bArr = encodeCANFrame(msg)
+    if DEBUG==True :
+        print "before sending ",bArr,type(bArr),len(bArr)
+        # bArr.replace(b'0x',b'')
+        for ss in bArr:
+            print ss
+        # print(bArr)
+    ser.write(bArr)
 
 def test_canFrameDecodder():
     #case 1
@@ -153,20 +239,21 @@ def hex_to_binary(h):
     return ''.join(byte_to_binary(ord(b)) for b in binascii.unhexlify(h))
 
 if __name__ == '__main__':
-    arguments = docopt(__doc__)
-    # start authentication
+    # arguments = docopt(__doc__)
+    # # start authentication
     startAuth()
-    #getting args values Todo : cont. handling args when we need it
-    if arguments['--port'][0] != None: #set the com port
-        COM_PORT = arguments['--port'][0]
-    if arguments['--d'] == True: #enable Debug mode
-        DEBUG=True
-    if len(arguments['--baudrate']) != 0: #set baudrate
-        BaudRate = int(arguments['--baudrate'][0])
-    if arguments['sniff'] == True:
-        if DEBUG==True :
-            print "DEBUG --> Starting Sniffing commmand"
-        # sniff()
+    # #getting args values Todo : cont. handling args when we need it
+    # if len(arguments['--port']) != 0: #set the com port
+    #     COM_PORT = arguments['--port'][0]
+    # if arguments['--d'] == True: #enable Debug mode
+    #     DEBUG=True
+    # if len(arguments['--baudrate']) != 0: #set baudrate
+    #     BaudRate = int(arguments['--baudrate'][0])
+    # if arguments['sniff'] == True:
+    #     if DEBUG==True :
+    #         print "DEBUG --> Starting Sniffing commmand"
+    #     sniff()
     #close connection with the serial port
-    test_encodeID()
+    # sniff()
+    sendTestFrame()
     closeConn()
