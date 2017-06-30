@@ -1,5 +1,10 @@
 import struct
 import array
+try:
+    import sys,serial,time,binascii ,array,struct
+    from docopt import docopt
+except:
+    print 'Import Errors!!'
 
 __author__ = 'MoatazFarid'
 
@@ -72,6 +77,35 @@ def UCAN_encode_message(msg):
     out = array.array('B',list(a+b+c+d))
     print out
     return out
+
+# def UCAN_startConn():
+#     ''' This function handle the Authentication with the usb to CAN '''
+#     if DEBUG==True :
+#         print ("Start initialization")
+#     ser.setDTR(True);
+#     time.sleep(2)
+#     ser.write(bytearray([105, 115, 85, 50, 67]))
+#     if DEBUG==True :
+#         print ("Start reading")
+#     ans = ser.read(2)
+#     if DEBUG==True :
+#         print (ans)
+#         print ("reading finished")
+#         print ("recieved YI ")
+#
+#     ser.write(bytearray([12]))
+
+# def UCAN_closeConn():
+#     ''' close the connections and exit system '''
+#     ser.close()
+#     sys.exit(0)
+
+# def UCAN_read_msg():
+#     framebuffer=ser.read(13).encode("hex")
+#     if DEBUG==True :
+#         print "DEBUG-> SERIAL is ",framebuffer
+#     # bin(int(framebuffer,16)) #converted into binary
+#     msg = canFrameDecodder(framebuffer)
 
 # if __name__ == '__main__':
     # print ""
