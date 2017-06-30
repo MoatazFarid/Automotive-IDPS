@@ -2,20 +2,20 @@
     CAN Bus Vulnerability tool
     This tool is part of Automotive IDPS and Cyber Security Vulnerability tool Graduation Project
 Usage:
-    app.py sniff [--port=COM6] [--baudrate=115200] [--d] [--conf=path] [--out] [( [--BL] [--v] --case=name )]
-    app.py spoof [( <target_ecu_name> <msg_name> <signal_name> <new_val> )][--port=COM6] [--baudrate=115200] [--d] [--conf=path]
+    app.py sniff [--port=COM6] [--baudrate=115200] [-d] [--conf=path] [--out] [(--BL case <case_name> )]
+    app.py spoof [( <target_ecu_name> <msg_name> <signal_name> <new_val> )][--port=COM6] [--baudrate=115200] [-d] [--conf=path]
+    app.py report (-v case <case_name> )|
 Options:
     --port=COM6         Select the port we connected our UCAN on default is COM6
     --baudrate=115200   Select the BaudRate we use default is 115200
-    --d                 Debug mode
+    -d                 Debug mode
     --conf=path         Path of the xml config file default is conf.xml file name in same directory of the script
     --out               output the log of the sniffing to log.txt file
     --BL                calculate the busload and insert it into external file
-    --v                 visualise the outputs
-    --case=name         name the case which is used as Busload file name
+    -v                 visualise the outputs
 '''
 import datetime
-import thread
+import threading
 
 try:
     import sys,serial,time,binascii,UCAN,sched
@@ -29,7 +29,7 @@ except:
 COM_PORT = 'COM6'
 #COM_PORT = '/dev/ttyUSB0'
 BaudRate = 115200
-DEBUG = False
+DEBUG = True
 
 
 #starting
@@ -50,6 +50,7 @@ MSG_LATEST_COUNT=0 #used in bus load
 MSG_TEMP=0 #used in bus load function
 RATE=0 #used in bus load function
 CASENAME =""
+NO_AUTH=False
 
 
 Engine_Speed = CAN_MSG
@@ -114,18 +115,69 @@ def generate_door_onOff(left,right): ##val is an hex number
     Door_ONOFF.RTR=0#bool
 
 ## Bus load calculations
-def calc_BusLoad():
-    global MSG_TEMP
-    global MSG_COUNTER
-    global MSG_LATEST_COUNT
-    MSG_TEMP=MSG_COUNTER-MSG_LATEST_COUNT
-    MSG_LATEST_COUNT=MSG_COUNTER
-    RATE=(MSG_TEMP/3906)*100
-    print('calc bus load hh')
-    file=open("dd.txt","a+")
-    file.write(str(RATE)+"\n")
-    file.close()
-    s.enter(1,1,calc_BusLoad,())
+##sequential bus load calc
+# def calc_BusLoad():
+#     global MSG_TEMP
+#     global MSG_COUNTER
+#     global MSG_LATEST_COUNT
+#     MSG_TEMP=MSG_COUNTER-MSG_LATEST_COUNT
+#     MSG_LATEST_COUNT=MSG_COUNTER
+#     RATE=(MSG_TEMP/3906)*100
+#     print('calc bus load hh')
+#     file=open("dd.txt","a+")
+#     file.write(str(RATE)+"\n")
+#     file.close()
+#     s.enter(1,1,calc_BusLoad,())
+
+class calc_BusLoad(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        while True:
+            global MSG_TEMP
+            global MSG_COUNTER
+            global MSG_LATEST_COUNT
+            MSG_TEMP=MSG_COUNTER-MSG_LATEST_COUNT
+            MSG_LATEST_COUNT=MSG_COUNTER
+            RATE=(float(MSG_TEMP)/3906.0)*100.0
+            print('calc bus load hh')
+            file=open(str(CASENAME),"a+")
+            file.write(str(RATE)+"\n")
+            file.close()
+            time.sleep(1)
+
+class sniffing(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        print "++++++++= Start Sniffing CAN Bus =++++++++"
+        while True:
+            #convert from byte to hex string
+            framebuffer=ser.read(13).encode("hex")
+            if DEBUG==True :
+                print "DEBUG-> SERIAL is ",framebuffer
+            # bin(int(framebuffer,16)) #converted into binary
+            msg = canFrameDecodder(framebuffer)
+            printMsg(msg)
+
+class visualize_busLoad(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        x = []
+        with open(str(CASENAME),'r+') as csvfile:
+            plots = csv.reader(csvfile, delimiter=',')
+            for row in plots:
+                x.append(int(row[0]))
+        plt.plot(x, label='Bus Load')
+        plt.xlabel('x')
+
+        plt.title(CASENAME)
+        plt.legend()
+        plt.show()
+
 
 #start connection
 try:
@@ -154,7 +206,7 @@ def startAuth():
 
     ser.write(bytearray([12]))
 
-
+##sequential sniff
 def sniff():
     ''' start sniffing over the CAN bus  '''
     # print(chr(27) + "[2J") #clear screen
@@ -263,79 +315,99 @@ def byte_to_binary(n):
 def hex_to_binary(h):
     return ''.join(byte_to_binary(ord(b)) for b in binascii.unhexlify(h))
 
-
-def visualise_busLoad():
-    print( 'visualize bus load entered ')
-    x = []
-    with open('dd.txt','r') as csvfile:
-        plots = csv.reader(csvfile, delimiter=',')
-        for row in plots:
-            x.append(int(row[0]))
-
-
-    plt.plot(x, label='Bus Load')
-    plt.xlabel('x')
-
-    plt.title(CASENAME)
-    plt.legend()
-    plt.show()
-
-def start_visaliseBusLoad():
-    s.enter(20,2,visualise_busLoad,())
-
-def start_busload_calc():
-    oldtime = time.time()
-    # check
-    while True:
-        if time.time() - oldtime > 59:
-            calc_BusLoad()
-            oldtime=time.time()
+#sequlential busload
+# def visualise_busLoad():
+#     print( 'visualize bus load entered ')
+#     x = []
+#     with open('dd.txt','r') as csvfile:
+#         plots = csv.reader(csvfile, delimiter=',')
+#         for row in plots:
+#             x.append(int(row[0]))
+#
+#
+#     plt.plot(x, label='Bus Load')
+#     plt.xlabel('x')
+#
+#     plt.title(CASENAME)
+#     plt.legend()
+#     plt.show()
 
 
 if __name__ == '__main__':
+    threads=[]
     arguments = docopt(__doc__)
-    # start authentication
-    startAuth()
-    #getting args values Todo : cont. handling args when we need it
-    if len(arguments['--port']) != 0: #set the com port
-        COM_PORT = arguments['--port'][0]
-    if arguments['--d'] == True: #enable Debug mode
-        DEBUG=True
-    if len(arguments['--baudrate']) != 0: #set baudrate
-        BaudRate = int(arguments['--baudrate'][0])
-    if arguments['--out'] == True:
-        if DEBUG==True :
-            print "DEBUG --> Log file output is enabled "
-        LOG = 'log.txt'
-    if arguments['--v'] == True:
-        if DEBUG==True :
-            print "DEBUG --> visualise the bus load is enabled which will visaulise after 60 second"
-        try:
-            thread.start_new_thread(start_visaliseBusLoad,())
-        except:
-            print("can't start" ),"visualise_busLoad"
-    if arguments['--BL'] == True:
-        if DEBUG==True :
-            print "DEBUG --> calcaulate the busload per second is enabled "
-        # s.enter(1,1,calc_BusLoad,())
-        # calc_BusLoad()
-        try:
-            thread.start_new_thread(start_busload_calc,())
-        except:
-            print 'can not start bus load calc thread'
-    if len(arguments['--case']) !=0:
-        if DEBUG==True :
-            print "DEBUG --> case name is ",str(arguments['--case'][0])
-        CASENAME = str(arguments['--case'][0])
+    #incase of reports
+    if arguments['report'] == True:
+        # set no auth flag
+        global NO_AUTH
+        NO_AUTH = True
+        if arguments['case'] == True:
+            if DEBUG==True :
+                print "DEBUG --> case name is " , arguments['<case_name>']
+            CASENAME = arguments['<case_name>']
+
+        if arguments['-v'] == True:
+            if DEBUG==True :
+                print "DEBUG --> visualise the bus load is enabled which will visaulise after 60 second"
+            try:
+                thread = visualize_busLoad()
+                thread.start()
+                threads.append(thread)
+            except:
+                print("can't start" ),"visualise_busLoad"
+
+    if NO_AUTH == False:
+        # start UCAN authentication for Auth needed commands
+        startAuth()
+
+    #in case of sniffing  todo : conf=path is not implemented yet
     if arguments['sniff'] == True:
         if DEBUG==True :
             print "DEBUG --> Starting Sniffing commmand"
+        #getting args and options
+        if len(arguments['--port']) != 0 : #set the com port
+            COM_PORT = arguments['--port'][0]
+
+        if arguments['-d'] == True: #enable Debug mode
+            DEBUG=True
+
+        if len(arguments['--baudrate']) != 0: #set baudrate
+            BaudRate = int(arguments['--baudrate'][0])
+
+        if arguments['--out'] == True:
+            if DEBUG==True :
+                print "DEBUG --> Log file output is enabled "
+            LOG = 'log.txt'
+
+        if arguments['case'] == True:
+            if DEBUG==True :
+                print "DEBUG --> case name is " , arguments['<case_name>']
+            CASENAME = arguments['<case_name>']
+
+        if arguments['--BL'] == True:
+            if DEBUG==True :
+                print "DEBUG --> calcaulate the busload per second is enabled "
+            try:
+                thread=calc_BusLoad()
+                thread.start()
+                threads.append(thread)
+            except:
+                print 'can not start calc_BusLoad thread!!'
+
         try:
-            # thread.start_new_thread(sniff,())
-            sniff()
+            thread=sniffing()
+            thread.start()
+            threads.append(thread)
         except:
             print('can not start sniff thread ')
+
+    #TODO : in case of spoof
+
+    #joining threads
+    for thread in threads:
+        thread.join()
+
     #close connection with the serial port
-    # sniff()
-    # sendTestFrame()
-    closeConn()
+    if NO_AUTH == False:
+        # close connection with the serial port
+        closeConn()
