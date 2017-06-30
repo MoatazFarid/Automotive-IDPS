@@ -13,7 +13,7 @@ Options:
 from _ctypes import sizeof
 
 try:
-    import sys,serial,time,binascii
+    import sys,serial,time,binascii,UCAN
     from docopt import docopt
 except:
     print 'Import Errors!!'
@@ -255,5 +255,10 @@ if __name__ == '__main__':
     #     sniff()
     #close connection with the serial port
     # sniff()
-    sendTestFrame()
+    # sendTestFrame()
+    msg=UCAN.CAN_MSG
+    msg.frame_id=98
+    msg.frame_dlc=1
+    msg.data='01'
+    ser.write(UCAN.UCAN_encode_message(msg))
     closeConn()
