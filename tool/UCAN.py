@@ -1,5 +1,10 @@
 import struct
 import array
+try:
+    import sys,serial,time,binascii ,array,struct
+    from docopt import docopt
+except:
+    print 'Import Errors!!'
 
 __author__ = 'MoatazFarid'
 
@@ -30,6 +35,7 @@ def UCAN_encode_data(data,frame_dlc):
     b=array.array('b')
     # for i in range(frame_dlc):
     #     struct.pack_into('=B',b,i,hex(int(data[(i*2):(i*2)+2],16)))
+
     if frame_dlc == 1:
         b=struct.pack('=B',int(data[0:2],16))
     elif frame_dlc ==2:
@@ -72,6 +78,61 @@ def UCAN_encode_message(msg):
     out = array.array('B',list(a+b+c+d))
     print out
     return out
+
+def UCAN_decode_message(buffer):
+    msg = CAN_MSG
+    RX_bytes = array.array('B',buffer)
+    RXID = (int(str((RX_bytes[0])),16) & 0xFE)+ int(str((RX_bytes[1])),16)+int(str((RX_bytes[2])),16)+int(str((RX_bytes[3])),16)
+    RXID >>= 1
+    msg.frame_id = RXID
+
+    dlc = int(str(RX_bytes[4]),16) & 0xF
+    msg.frame_dlc = int(str(dlc),16)
+
+    data=[]
+    #check if RTR or not
+    if (RX_bytes[4] & 0x80) != 0 :
+        #RTR
+        msg.RTR = 1
+    else:
+        msg.RTR = 0
+        for i in range(8):
+            if i < dlc:
+                data.append(int(str(RX_bytes[i]),16))
+            data.append('00')
+        msg.data = ''.join(str(data))
+    return msg
+
+
+
+# def UCAN_startConn():
+#     ''' This function handle the Authentication with the usb to CAN '''
+#     if DEBUG==True :
+#         print ("Start initialization")
+#     ser.setDTR(True);
+#     time.sleep(2)
+#     ser.write(bytearray([105, 115, 85, 50, 67]))
+#     if DEBUG==True :
+#         print ("Start reading")
+#     ans = ser.read(2)
+#     if DEBUG==True :
+#         print (ans)
+#         print ("reading finished")
+#         print ("recieved YI ")
+#
+#     ser.write(bytearray([12]))
+
+# def UCAN_closeConn():
+#     ''' close the connections and exit system '''
+#     ser.close()
+#     sys.exit(0)
+
+# def UCAN_read_msg():
+#     framebuffer=ser.read(13).encode("hex")
+#     if DEBUG==True :
+#         print "DEBUG-> SERIAL is ",framebuffer
+#     # bin(int(framebuffer,16)) #converted into binary
+#     msg = canFrameDecodder(framebuffer)
 
 # if __name__ == '__main__':
     # print ""

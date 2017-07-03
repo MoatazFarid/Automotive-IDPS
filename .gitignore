@@ -2,3 +2,5 @@ tool/.idea/workspace.xml
 tool/.idea/vcs.xml
 *.pyc
 tool/.idea/workspace.xml
+tool/log.txt
+*.txt
