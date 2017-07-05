@@ -8,7 +8,7 @@ except:
 
 __author__ = 'MoatazFarid'
 
-DEBUG = True
+DEBUG = False
 
 class CAN_MSG:
     ''' CAN MSG structure '''
@@ -22,7 +22,7 @@ class CAN_MSG:
 def UCAN_encode_id(frame_id, isExtended):
     b= struct.pack('=BBBB',((frame_id<<1) | (isExtended & 1)),(frame_id>>8),(frame_id>>8),(frame_id>>8)) #it is inserted into 4 bytes
     if DEBUG==True :
-        print "DEBUG --> DLC and RTR Byte : " ,b
+        print "DEBUG --> DLC and RTR Byte : " ,int(b)
     return b
 
 def UCAN_encode_dlc(frame_dlc,RTR):
@@ -76,7 +76,8 @@ def UCAN_encode_message(msg):
         l.append(0)
         d= tuple(l)
     out = array.array('B',list(a+b+c+d))
-    print out
+    if DEBUG==True :
+        print "DEBUG --> Msg Array",out
     return out
 
 def UCAN_decode_message(buffer):

