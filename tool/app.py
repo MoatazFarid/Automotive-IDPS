@@ -144,6 +144,7 @@ class dos(Thread):
         Thread.__init__(self)
 
     def run(self):
+        print("DOS attack started")
         while True:
             global MSGS_QUEUE,MSG_COUNTER
             if len(MSGS_QUEUE) != 0:
@@ -181,10 +182,14 @@ class detected(Thread):
             log+="========\n"
             log+= str(self.attack_name)+" Attack has been Detected by :"+str(self.algo_name)+" \n"
             log+="========\n"
-            log+="Bus Load report is named :"+str(CASENAME)+"\n"
-            log+="========\n"
-            log+="To view Bus load Graphs please enter the following command \n"
-            log+="python app.py report -v case"+str(CASENAME)+"\n"
+            log+="Bus Load report is named :"+CASENAME+"\n"
+            if str(CASENAME) != "None":
+                log+="========\n"
+                log+="To view Bus load Graphs please enter the following command \n"
+                log+="python app.py report -v case "+str(CASENAME)+"\n"
+                log+="\n"
+            else:
+                log+="\n"
             sendToLog(log,'Attack_Report.txt')
         else:
             log="===============Attack Success Report=====================\n"
@@ -192,11 +197,16 @@ class detected(Thread):
             log+="========\n"
             log+= str(self.attack_name)+" Attack is applied but Can't be Detected by :"+str(self.algo_name)+" \n"
             log+="========\n"
-            log+="Bus Load report is named :"+str(LOG)+"\n"
-            log+="========\n"
-            log+="To view Bus load Graphs please enter the following command \n"
-            log+="python app.py report -v case Attack_Report.txt "
+            log+="Bus Load report is named :"+str(CASENAME)+"\n"
+            if str(CASENAME) != "None":
+                log+="========\n"
+                log+="To view Bus load Graphs please enter the following command \n"
+                log+="python app.py report -v case"+str(CASENAME)+"\n"
+                log+="\n"
+            else:
+                log+="\n"
             sendToLog(log,'Attack_Report.txt')
+        print("Our Tool Finished Testing The Algorithm ..")
 
 
 
@@ -311,7 +321,6 @@ class replay(Thread):
                 mutex.acquire()
                 # msg.frame_dlc = len(msg.data)/2
                 # print('msg found')
-                print msg.data , msg.frame_id ,msg.frame_dlc
                 #Update and send the msg
                 if self.new==True: #if we need to update the value with a new One
                     msg.data=self.val
@@ -320,14 +329,22 @@ class replay(Thread):
                 MSG_COUNTER +=1
                 try:
                     ser.write(UCAN.UCAN_encode_message(msg))
-                    print "Msg sent successfully"
+                    print "Frame sent successfully" ,msg.data , msg.frame_id
                     mutex.release()
                 except:
                     print "couldn't apply replay attack"
 
 
 def startAuth():
-    ''' This function handle the Authentication with the usb to CAN '''
+    '''
+Function name:
+        startAuth()
+Description:
+        start Authentication of the Application with UCAN device and Open a serial connection with the device
+Parameters (IN): -
+Parameters (OUT): -
+Return value: -
+'''
     if DEBUG==True :
         print ("Start initialization")
     ser.setDTR(True);
@@ -345,12 +362,32 @@ def startAuth():
 
 
 def closeConn():
-    ''' close the connections and exit system '''
+    '''
+Function name:
+        closeConn()
+Description:
+        End the serial connection with the device and terminate the Application
+Parameters (IN): -
+Parameters (OUT): -
+Return value -
+'''
     ser.close()
     sys.exit(0)
 
 
 def getFrameData(frame, dlc):
+    '''
+Function name:
+        getFrameData(frame, dlc)
+Description:
+        extract the data section from the frame string
+Parameters (IN):
+        frame :the received frame string from the serial bus
+        dlc : the length of the data section in bytes
+Parameters (OUT):
+        data : a string of data section
+Return value: -
+'''
     if DEBUG==True :
         print "DEBUG --> getFrameData-> dlc is ",dlc
     data = frame[12:12+(2*dlc)] #12 to 28
@@ -359,12 +396,32 @@ def getFrameData(frame, dlc):
     return data
 
 def getFrameDLC(frame):
+    '''
+Function name:
+        getFrameDLC(frame)
+Description:
+        extract the dlc from the frame string
+Parameters (IN):
+        frame :the received frame string from the serial bus
+Parameters (OUT):
+        dlc: a string of dlc section
+Return value: -
+'''
     dlc = int(frame[10:12],16) & 0x0F
     if DEBUG==True :
         print "DEBUG --> DLC is ",dlc,type(dlc)
     return dlc
 
 def canFrameDecodder(frame):
+    '''
+Function name : canFrameDecodder
+Description : decode the frame string from the serial bus to a CAN msg object
+Parameters (IN):
+frame :the received frame string from the serial bus
+Parameters (OUT) :
+        msg: a msg object from CAN_MSG class
+Return value : -
+'''
     msg = CAN_MSG()
     mutex.acquire()
     msg.frame_id = getStandardID(frame)
@@ -374,7 +431,15 @@ def canFrameDecodder(frame):
     return msg
 
 def getStandardID(frame):
-    ''' encode the standard it '''
+    '''
+Function name: getStandardID
+Description:get the standard ID from the Frame string
+Parameters (IN):
+        frame :the received frame string from the serial bus
+Parameters (OUT):
+        id : the ID of the CAN frame received
+Return value:-
+    '''
     # b1=int(frame[0:2],16)
     b1=int(frame[2:4],16)
     b2=int(frame[4:6],16)
@@ -387,67 +452,70 @@ def getStandardID(frame):
     return fId
 
 def sendToLog(log,fileName):
+    '''
+Function name:sendToLog()
+Description: save log to a text file
+Parameters (IN):
+        log : the log text that is going to be saved
+        fileName : the name of the Log text file
+Parameters (OUT): -
+Return value:-
+'''
     file = open(fileName,'a+')
     file.write(log)
     file.close()
 
 def printMsg(msg):
-    ''' Print the sniffed msg '''
+    '''
+Function name:printMsg(msg)
+Description: print the CAN msg on the screen , save it to log file if required , and increase the can frame counter
+Parameters (IN):
+        msg : msg object from CAN_MSG class
+Parameters (OUT):-
+Return value:-
+    '''
     global MSG_COUNTER
     log = str((MSG_COUNTER))+'@'+datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')+("|ID :")+str(msg.frame_id)+"|DLC:"+str(msg.frame_dlc)+"|Data:"+str(msg.data) +'\n'
     MSG_COUNTER +=1
     if LOG != None:
         sendToLog(log,LOG)
     if sameFrameExists(msg):
+        print log
         pass
     else:
         sniffed_Msgs.append(msg)
         print log
 
 def sameFrameExists(msg):
-    ''' This function is used to check if the recieved msg has been seen before or not , it is used in the printMsg function '''
+    '''
+Function name:sameFrameExists(msg)
+Description:This function is used to check if the received can frame has been seen before or not , it is used in the printMsg function
+Parameters (IN):
+        msg : msg object from CAN_MSG class
+Parameters (OUT):-
+Return value:-
+    '''
     for s in sniffed_Msgs:
         if (s.frame_id == msg.frame_id) and (s.data==msg.data):
             return True
     return False
 
 def idExists(msg):
-    ''' This function is used to check if the recieved msg has been seen before or not , it is used in the printMsg function '''
+    '''
+Function name:idExists(msg)
+Description:
+This function is used to check if the frame id has been seen before or not ,
+we are not matching the data ,just the id ,
+ it is used in the printMsg function
+Parameters (IN):
+        msg : msg object from CAN_MSG class
+Parameters (OUT):-
+Return value:-
+    '''
     for s in sniffed_Msgs:
         if (s.frame_id == msg.frame_id):
             return True
     return False
-
-def isExtendedID(IDE):
-    ''' Check whether the function '''
-    if IDE=='1' or  IDE== 1:
-        return True
-    else:
-        return False
-
-
-def sendTestFrame():
-    msg=UCAN.CAN_MSG
-    msg.frame_id=98
-    msg.frame_dlc=1
-    msg.data='01'
-    ser.write(UCAN.UCAN_encode_message(msg))
-
-def test_canFrameDecodder():
-    #case 1
-    i = '00000000000001000000010110100100000011000110110000101100010011011000110010100100000'
-    canFrameDecodder(i)
-    i = '01110010011101100110111101110010001000000010110100100000011000110110000101100010011011000110010100100000'
-    canFrameDecodder(i)
-
-def byte_to_binary(n):
-    return ''.join(str((n & (1 << i)) and 1) for i in reversed(range(8)))
-
-def hex_to_binary(h):
-    return ''.join(byte_to_binary(ord(b)) for b in binascii.unhexlify(h))
-
-
-
 
 
 if __name__ == '__main__':
@@ -479,7 +547,6 @@ if __name__ == '__main__':
         #handlling coniguration args
         if arguments['--port'] != None : #set the com port
             COM_PORT = str(arguments['--port'])
-            print(COM_PORT)
         if arguments['--baudrate'] != None: #set baudrate
             BaudRate = int(arguments['--baudrate'])
         #start connection
@@ -585,7 +652,8 @@ if __name__ == '__main__':
     if arguments['dos'] == True:
         if arguments['--port'] != None : #set the com port
             COM_PORT = arguments['--port']
-            print 'DEBUG->> PORT is =',COM_PORT
+            if DEBUG==True:
+                print 'DEBUG->> PORT is =',COM_PORT
 
         if arguments['-d'] == True: #enable Debug mode
             DEBUG=True
@@ -612,7 +680,7 @@ if __name__ == '__main__':
         if arguments['--DR']==True:
         #detection report is required
             if arguments['<AlgorithmName>'] != None:
-                thread = detected('Spoofing',str(arguments['<AlgorithmName>']))
+                thread = detected('DOS',str(arguments['<AlgorithmName>']))
                 thread.start()
                 threads.append(thread)
 
@@ -623,8 +691,8 @@ if __name__ == '__main__':
     if arguments['replay'] == True:
         if arguments['--port'] != None : #set the com port
             COM_PORT = arguments['--port']
-            print 'DEBUG->> PORT is =',COM_PORT
-
+            if DEBUG==True:
+                print 'DEBUG->> PORT is =',COM_PORT
         if arguments['-d'] == True: #enable Debug mode
             DEBUG=True
 
@@ -638,13 +706,14 @@ if __name__ == '__main__':
                 thread = replay(target,True,val)
                 thread.start()
                 threads.append(thread)
-            thread = replay(target,False,0)
-            thread.start()
-            threads.append(thread)
+            else:
+                thread = replay(target,False,0)
+                thread.start()
+                threads.append(thread)
         if arguments['--DR']==True:
         #detection report is required
             if arguments['<AlgorithmName>'] != None:
-                thread = detected('Spoofing',str(arguments['<AlgorithmName>']))
+                thread = detected('Replay',str(arguments['<AlgorithmName>']))
                 thread.start()
                 threads.append(thread)
 
