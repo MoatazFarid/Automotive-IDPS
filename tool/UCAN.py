@@ -20,22 +20,47 @@ class CAN_MSG:
 
 
 def UCAN_encode_id(frame_id, isExtended):
+    '''
+Function name:  UCAN_encode_id(frame_id, isExtended)
+Description:  encode the CAN frame id into byte array
+Parameters (IN):
+        frame_id : the id to be encoded
+        isExtended : flag to determine if the id was extended or not
+Parameters (OUT):
+    struct of byte array
+Return value:-
+'''
     b= struct.pack('=BBBB',((frame_id<<1) | (isExtended & 1)),(frame_id>>8),(frame_id>>8),(frame_id>>8)) #it is inserted into 4 bytes
     if DEBUG==True :
         print "DEBUG --> DLC and RTR Byte : " ,int(b)
     return b
 
 def UCAN_encode_dlc(frame_dlc,RTR):
+    '''
+Function name: UCAN_encode_dlc(frame_dlc,RTR)
+Description: encode the CAN frame dlc into byte array
+Parameters (IN):
+        frame_dlc : the dlc to be encoded
+        RTR : flag to determine if the frame was RTR or DATA frame
+Parameters (OUT): struct of byte array
+Return value:-
+'''
     b = struct.pack('=B',((frame_dlc)|((RTR & 0x01)<< 7) ) )
     if DEBUG==True :
         print "DEBUG --> DLC and RTR Byte : " ,b
     return b
 
 def UCAN_encode_data(data,frame_dlc):
+    '''
+Function name: UCAN_encode_data(data,frame_dlc)
+Description: encode the CAN frame data into byte array
+Parameters (IN):
+        frame_dlc : the dlc to be encoded
+        data : the string of data to be encoded
+Parameters (OUT): struct of byte array
+Return value: -
+'''
     b=array.array('b')
-    # for i in range(frame_dlc):
-    #     struct.pack_into('=B',b,i,hex(int(data[(i*2):(i*2)+2],16)))
-
     if frame_dlc == 1:
         b=struct.pack('=B',int(data[0:2],16))
     elif frame_dlc ==2:
@@ -60,8 +85,12 @@ def UCAN_encode_data(data,frame_dlc):
 
 def UCAN_encode_message(msg):
     '''
-    This function encodes the can msg and returns byte array
-    input is CAN_MSG
+Function name: UCAN_encode_message(msg)
+Description: This function encodes the can frame and returns byte array
+Parameters (IN):
+        msg : msg object from CAN_MSG class
+Parameters (OUT): byte array
+Return value: -
     '''
     ID = UCAN_encode_id(msg.frame_id,msg.isExtended)
     DLC = UCAN_encode_dlc(msg.frame_dlc,msg.RTR)
@@ -79,30 +108,30 @@ def UCAN_encode_message(msg):
     if DEBUG==True :
         print "DEBUG --> Msg Array",out
     return out
-
-def UCAN_decode_message(buffer):
-    msg = CAN_MSG
-    RX_bytes = array.array('B',buffer)
-    RXID = (int(str((RX_bytes[0])),16) & 0xFE)+ int(str((RX_bytes[1])),16)+int(str((RX_bytes[2])),16)+int(str((RX_bytes[3])),16)
-    RXID >>= 1
-    msg.frame_id = RXID
-
-    dlc = int(str(RX_bytes[4]),16) & 0xF
-    msg.frame_dlc = int(str(dlc),16)
-
-    data=[]
-    #check if RTR or not
-    if (RX_bytes[4] & 0x80) != 0 :
-        #RTR
-        msg.RTR = 1
-    else:
-        msg.RTR = 0
-        for i in range(8):
-            if i < dlc:
-                data.append(int(str(RX_bytes[i]),16))
-            data.append('00')
-        msg.data = ''.join(str(data))
-    return msg
+#
+# def UCAN_decode_message(buffer):
+#     msg = CAN_MSG
+#     RX_bytes = array.array('B',buffer)
+#     RXID = (int(str((RX_bytes[0])),16) & 0xFE)+ int(str((RX_bytes[1])),16)+int(str((RX_bytes[2])),16)+int(str((RX_bytes[3])),16)
+#     RXID >>= 1
+#     msg.frame_id = RXID
+#
+#     dlc = int(str(RX_bytes[4]),16) & 0xF
+#     msg.frame_dlc = int(str(dlc),16)
+#
+#     data=[]
+#     #check if RTR or not
+#     if (RX_bytes[4] & 0x80) != 0 :
+#         #RTR
+#         msg.RTR = 1
+#     else:
+#         msg.RTR = 0
+#         for i in range(8):
+#             if i < dlc:
+#                 data.append(int(str(RX_bytes[i]),16))
+#             data.append('00')
+#         msg.data = ''.join(str(data))
+#     return msg
 
 
 
