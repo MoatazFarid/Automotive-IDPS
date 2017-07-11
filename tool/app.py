@@ -201,7 +201,7 @@ class detected(Thread):
             if str(CASENAME) != "None":
                 log+="========\n"
                 log+="To view Bus load Graphs please enter the following command \n"
-                log+="python app.py report -v case"+str(CASENAME)+"\n"
+                log+="python app.py report -v case "+str(CASENAME)+"\n"
                 log+="\n"
             else:
                 log+="\n"
